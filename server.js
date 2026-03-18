@@ -8,7 +8,9 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+
+// SỬA LỖI 1: Trỏ thẳng vào thư mục hiện tại (root) chứa file index.html
+app.use(express.static(".")); 
 
 // 🚀 cache giúp tăng tốc
 const cache = new Map();
@@ -36,9 +38,7 @@ app.post("/api/ai", async (req, res) => {
     });
 
     const data = await response.json();
-
     cache.set(key, data);
-
     res.json(data);
 
   } catch (err) {
@@ -46,6 +46,8 @@ app.post("/api/ai", async (req, res) => {
   }
 });
 
-app.listen(3000, "0.0.0.0", () => {
-  console.log("🚀 http://0.0.0.0:3000");
+// SỬA LỖI 2: Sử dụng PORT động của Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server đang chạy tại port ${PORT}`);
 });
