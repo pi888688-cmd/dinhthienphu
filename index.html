@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>AI EdTech - Luyện Thi & Tự Học</title>
+    
+    <script>
+        MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, startup: { typeset: false } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-hover: #4338ca; --secondary: #10b981;
+            --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #1f2937;
+            --text-muted: #6b7280; --border-color: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100dvh; overflow: hidden; overscroll-behavior-y: none; }
+        .app-container { display: flex; width: 100%; height: 100%; }
+        
+        .sidebar { width: 340px; background: var(--card-bg); padding: 20px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; overflow-y: auto; z-index: 10; }
+        .sidebar h2 { color: var(--primary); font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 5px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-weight: 600; font-size: 13px; color: var(--text-main); }
+        select, input[type="text"] { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: #f9fafb; width: 100%; }
+        select:focus, input:focus { border-color: var(--primary); background: #fff; }
+        
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; background: #f9fafb; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);}
+        .checkbox-label { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: normal; cursor: pointer; width: 45%;}
+        
+        button { touch-action: manipulation; user-select: none; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 5px; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--secondary); }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; background: #e5e7eb; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; color: var(--text-muted); transition: 0.3s;}
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        .main-content { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); scroll-behavior: smooth; }
+        .card { background: var(--card-bg); width: 100%; max-width: 800px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: auto 0; animation: fadeIn 0.3s ease; }
+        
+        .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .q-badge { background: var(--primary); color: white; padding: 4px 10px; border-radius: 15px; font-size: 12px; }
+        .q-text { font-size: 17px; line-height: 1.5; margin-bottom: 15px; font-weight: 500;}
+        
+        .options-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .option-btn { background: #f9fafb; border: 1px solid var(--border-color); padding: 12px 15px; font-size: 15px; border-radius: 8px; cursor: pointer; text-align: left; transition: 0.2s; }
+        .option-btn:hover:not(:disabled) { background: #e5e7eb; }
+        .option-btn.correct { background: #d1fae5; border-color: #10b981; color: #065f46; font-weight: bold; }
+        .option-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        
+        .tf-row { display: flex; justify-content: space-between; align-items: center; background: #f9fafb; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid var(--border-color);}
+        .tf-text { flex: 1; font-size: 14px; margin-right: 10px;}
+        .tf-btns { display: flex; gap: 5px; }
+        .tf-btn { padding: 6px 12px; border: 1px solid #ccc; border-radius: 5px; background: white; cursor: pointer; font-size: 13px;}
+        .tf-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .tf-btn.correct-mark { background: #10b981 !important; color: white; border-color: #10b981; }
+        .tf-btn.wrong-mark { background: #ef4444 !important; color: white; border-color: #ef4444; }
+
+        .short-input { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 15px; margin-bottom: 15px; outline: none;}
+        .essay-input { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 15px; margin-bottom: 15px; outline: none; min-height: 100px; resize: vertical; }
+
+        .hint-btn { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; margin-bottom: 15px; display: inline-block; }
+        .hint-box { background: #fffbeb; padding: 10px; border-radius: 8px; font-size: 14px; color: #b45309; margin-bottom: 15px; display: none; border: 1px dashed #fcd34d;}
+        
+        .explanation-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; }
+        .explanation-box h4 { color: #1d4ed8; margin-bottom: 5px; font-size: 15px; }
+        .explanation-box p { color: #1e3a8a; line-height: 1.5; font-size: 14px; }
+
+        .study-content { text-align: left; font-size: 15px; line-height: 1.6; }
+        .study-content h1, .study-content h2, .study-content h3 { color: var(--primary); margin: 15px 0 10px 0; }
+        .study-content p { margin-bottom: 10px; }
+        .study-content pre { background: #1f2937; color: white; padding: 15px; border-radius: 8px; overflow-x: auto; margin-bottom: 10px; }
+        
+        .spinner { border: 4px solid var(--border-color); border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hide { display: none !important; }
+
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; height: auto; display: block; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .main-content { padding: 15px 10px; min-height: 70vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <h2>AI EdTech System</h2>
+            <div class="tabs">
+                <div class="tab-btn active" onclick="switchTab('quiz')">📝 Luyện Đề</div>
+                <div class="tab-btn" onclick="switchTab('study')">📚 Tự Học</div>
+            </div>
+
+            <div class="form-group">
+                <label>Khối Lớp & Kỳ Thi:</label>
+                <div style="display: flex; gap: 5px;">
+                    <select id="grade" style="flex: 1;"><option value="12">Lớp 12</option><option value="11">Lớp 11</option><option value="10">Lớp 10</option></select>
+                    <select id="exam-period" style="flex: 1.5;"><option value="Giữa kì 1">Giữa kì 1</option><option value="Cuối kì 1">Cuối kì 1</option><option value="Giữa kì 2">Giữa kì 2</option><option value="Cuối kì 2">Cuối kì 2</option></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Môn & Bộ Sách:</label>
+                <div style="display: flex; gap: 5px;">
+                    <select id="subject" style="flex: 1;"><option value="Toán">Toán</option><option value="Vật lý">Vật Lý</option><option value="Hóa học">Hóa</option><option value="Tiếng Anh">Anh</option><option value="Sinh học">Sinh</option></select>
+                    <select id="book" style="flex: 1.5;"><option value="Chân trời sáng tạo">CTST</option><option value="Kết nối tri thức">KNTT</option><option value="Cánh diều">Cánh diều</option></select>
+                </div>
+            </div>
+
+            <div id="quiz-settings">
+                <div class="form-group">
+                    <label>Mức độ khó:</label>
+                    <select id="difficulty">
+                        <option value="Trộn lẫn các mức độ">Trộn lẫn (Tất cả)</option>
+                        <option value="Dễ (Nhận biết, Thông hiểu)">Dễ (Cơ bản)</option>
+                        <option value="Khó (Vận dụng, Vận dụng cao)">Khó (Nâng cao)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Loại câu hỏi:</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" value="trac_nghiem" checked class="q-type"> Trắc nghiệm</label>
+                        <label class="checkbox-label"><input type="checkbox" value="dung_sai" checked class="q-type"> Đúng/Sai</label>
+                        <label class="checkbox-label"><input type="checkbox" value="tra_loi_ngan" class="q-type"> Trả lời ngắn</label>
+                        <label class="checkbox-label" style="width: 100%;"><input type="checkbox" value="tu_luan" class="q-type"> Tự luận (AI chấm)</label>
+                    </div>
+                </div>
+                <button id="btn-generate-quiz" class="btn">🚀 Tạo Đề Trộn Ngẫu Nhiên</button>
+            </div>
+
+            <div id="study-settings" class="hide">
+                <div class="form-group">
+                    <label>Chủ đề bài học:</label>
+                    <input type="text" id="study-topic" placeholder="VD: Khảo sát hàm số...">
+                </div>
+                <button id="btn-generate-study" class="btn btn-secondary">📖 Giảng Bài & Ví Dụ</button>
+            </div>
+        </aside>
+
+        <main class="main-content" id="main-content">
+            <div id="screen-welcome" class="card">
+                <h1 style="color: var(--primary); margin-bottom: 10px; font-size: 24px;">Hệ Thống EdTech AI</h1>
+                <p style="color: var(--text-muted); font-size: 14px;">Chọn cài đặt bên trái và bấm nút để bắt đầu học tập.</p>
+            </div>
+
+            <div id="screen-loading" class="card hide">
+                <div class="spinner"></div>
+                <h2 id="loading-text">AI Đang Xử Lý...</h2>
+            </div>
+
+            <div id="screen-quiz" class="card hide">
+                <div class="q-header">
+                    <span id="q-badge" class="q-badge">Trắc Nghiệm</span>
+                    <span id="q-counter">Câu 1/5</span>
+                </div>
+                <h2 id="q-text" class="q-text">Đang tải...</h2>
+                <div id="hint-btn" class="hint-btn">💡 Xem Gợi ý</div>
+                <div id="hint-box" class="hint-box"></div>
+                <div id="q-render-area"></div>
+                <div id="exp-box" class="explanation-box">
+                    <h4>Chi tiết lời giải:</h4>
+                    <p id="exp-text"></p>
+                </div>
+                <button id="btn-submit-ans" class="btn btn-secondary hide">Kiểm Tra Đáp Án</button>
+                <button id="btn-next" class="btn hide">Câu Tiếp Theo ➔</button>
+            </div>
+
+            <div id="screen-study" class="card hide">
+                <div id="study-content" class="study-content"></div>
+            </div>
+
+            <div id="screen-result" class="card hide">
+                <h1>🎉 Hoàn Thành!</h1>
+                <h2>Điểm số: <span id="score-text">0/5</span></h2>
+                <button onclick="location.reload()" class="btn">Làm Đề Mới</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- CẤU HÌNH OPENROUTER ---
+      
+
+        const UI = {
+            grade: document.getElementById('grade'), exam: document.getElementById('exam-period'),
+            subject: document.getElementById('subject'), book: document.getElementById('book'),
+            diff: document.getElementById('difficulty'), topic: document.getElementById('study-topic'),
+            qTypes: document.querySelectorAll('.q-type'),
+            screens: { welcome: document.getElementById('screen-welcome'), loading: document.getElementById('screen-loading'), quiz: document.getElementById('screen-quiz'), study: document.getElementById('screen-study'), result: document.getElementById('screen-result') },
+            quiz: { badge: document.getElementById('q-badge'), counter: document.getElementById('q-counter'), text: document.getElementById('q-text'), renderArea: document.getElementById('q-render-area'), btnCheck: document.getElementById('btn-submit-ans'), btnNext: document.getElementById('btn-next'), hintBtn: document.getElementById('hint-btn'), hintBox: document.getElementById('hint-box'), expBox: document.getElementById('exp-box'), expText: document.getElementById('exp-text') }
+        };
+
+        let currentQuestions = []; let currentIndex = 0; let score = 0; let userTempAnswer = null;
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if(tab === 'quiz') { document.getElementById('quiz-settings').classList.remove('hide'); document.getElementById('study-settings').classList.add('hide'); } 
+            else { document.getElementById('quiz-settings').classList.add('hide'); document.getElementById('study-settings').classList.remove('hide'); }
+        }
+
+        async function callAI(prompt, isJson = true) {
+    try {
+        let finalPrompt = prompt;
+
+        if (isJson) {
+            finalPrompt += "\nChỉ trả về JSON hợp lệ, không markdown.";
+        }
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+
+        const res = await fetch("/api/ai", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                messages: [
+                    { role: "user", content: finalPrompt }
+                ]
+            }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeout);
+
+        if (!res.ok) throw new Error("Server lỗi");
+
+        const data = await res.json();
+
+        let text = data.choices[0].message.content;
+
+        if (isJson) {
+            const match = text.match(/\[[\s\S]*\]/);
+            if (match) text = match[0];
+            return JSON.parse(text);
+        }
+
+        return text;
+
+    } catch (err) {
+        alert("⚠️ Lỗi AI: " + err.message);
+        return null;
+    }
+}
+        document.getElementById('btn-generate-quiz').addEventListener('click', async () => {
+            let selectedTypes = Array.from(UI.qTypes).filter(cb => cb.checked).map(cb => cb.value);
+            if(selectedTypes.length === 0) return alert("Chọn ít nhất 1 loại câu hỏi!");
+            Object.values(UI.screens).forEach(s => s.classList.add('hide'));
+            UI.screens.loading.classList.remove('hide');
+
+            const prompt = `Tạo 5 câu hỏi môn ${UI.subject.value} lớp ${UI.grade.value}, kì ${UI.exam.value}, sách ${UI.book.value}. Độ khó: ${UI.diff.value}. Loại câu hỏi bao gồm: ${selectedTypes.join(', ')}.
+            CẤU TRÚC JSON MẪU BẮT BUỘC:
+            [ 
+              { "type": "trac_nghiem", "question": "...", "hint": "...", "explanation": "...", "options": ["A", "B", "C", "D"], "correct_index": 0 },
+              { "type": "dung_sai", "question": "...", "hint": "...", "explanation": "...", "statements": [{"text": "...", "is_true": true}] },
+              { "type": "tra_loi_ngan", "question": "...", "hint": "...", "explanation": "...", "short_answer_key": "..." },
+              { "type": "tu_luan", "question": "...", "hint": "...", "explanation": "...", "suggested_answer": "..." }
+            ]`;
+
+            const data = await callAI(prompt, true);
+            if(data && Array.isArray(data)) { 
+                currentQuestions = data; 
+                currentIndex = 0; 
+                score = 0; 
+                UI.screens.loading.classList.add('hide'); 
+                UI.screens.quiz.classList.remove('hide'); 
+                renderQuestion(); 
+            } else {
+                UI.screens.loading.classList.add('hide');
+                UI.screens.welcome.classList.remove('hide');
+            }
+        });
+
+        function renderQuestion() {
+            UI.quiz.hintBox.style.display = 'none'; UI.quiz.expBox.style.display = 'none';
+            UI.quiz.btnNext.classList.add('hide'); UI.quiz.btnCheck.classList.add('hide'); UI.quiz.renderArea.innerHTML = ''; 
+
+            if (!currentQuestions[currentIndex]) return;
+            const q = currentQuestions[currentIndex];
+            
+            UI.quiz.counter.innerText = `Câu ${currentIndex + 1}/${currentQuestions.length}`;
+            UI.quiz.text.innerHTML = q.question;
+            UI.quiz.hintBox.innerHTML = q.hint || "Cố gắng suy nghĩ và vận dụng kiến thức nhé!";
+            
+            // Cập nhật Badge tùy theo loại câu hỏi
+            const typeLabels = { "trac_nghiem": "Trắc Nghiệm", "dung_sai": "Đúng/Sai", "tra_loi_ngan": "Trả Lời Ngắn", "tu_luan": "Tự Luận" };
+            UI.quiz.badge.innerText = typeLabels[q.type] || "Câu Hỏi";
+
+            if (q.type === 'trac_nghiem') {
+                const grid = document.createElement('div'); grid.className = 'options-grid';
+                if (q.options && Array.isArray(q.options)) {
+                    q.options.forEach((text, i) => {
+                        const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerHTML = text;
+                        btn.onclick = () => { 
+                            if (i === q.correct_index) score++;
+                            Array.from(grid.children).forEach((b, idx) => {
+                                b.disabled = true;
+                                if(idx === q.correct_index) b.classList.add('correct');
+                                else if(idx === i) b.classList.add('wrong');
+                            });
+                            showExp(q.explanation);
+                        };
+                        grid.appendChild(btn);
+                    });
+                }
+                UI.quiz.renderArea.appendChild(grid);
+            } else if (q.type === 'dung_sai') {
+                userTempAnswer = {};
+                if (q.statements && Array.isArray(q.statements)) {
+                    q.statements.forEach((st, i) => {
+                        const row = document.createElement('div'); row.className = 'tf-row';
+                        row.innerHTML = `<div class="tf-text">${st.text}</div><div class="tf-btns" id="tf-group-${i}">
+                            <button class="tf-btn" onclick="userTempAnswer[${i}]=true; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('selected')); this.classList.add('selected')">Đúng</button>
+                            <button class="tf-btn" onclick="userTempAnswer[${i}]=false; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('selected')); this.classList.add('selected')">Sai</button>
+                        </div>`;
+                        UI.quiz.renderArea.appendChild(row);
+                    });
+                }
+                UI.quiz.btnCheck.classList.remove('hide');
+                UI.quiz.btnCheck.innerText = "Kiểm Tra Đáp Án";
+                UI.quiz.btnCheck.onclick = () => {
+                    let correctCount = 0;
+                    if (q.statements) {
+                        q.statements.forEach((st, i) => {
+                            if(userTempAnswer[i] === st.is_true) correctCount++;
+                            const btns = document.getElementById(`tf-group-${i}`).querySelectorAll('button');
+                            btns.forEach(b => {
+                                b.disabled = true;
+                                if(st.is_true && b.innerText === "Đúng") b.classList.add('correct-mark');
+                                if(!st.is_true && b.innerText === "Sai") b.classList.add('correct-mark');
+                            });
+                        });
+                        if(correctCount === q.statements.length) score++;
+                    }
+                    showExp(q.explanation);
+                };
+            } else if (q.type === 'tra_loi_ngan') {
+                const input = document.createElement('input'); input.className = 'short-input'; input.placeholder = "Nhập đáp án của bạn vào đây...";
+                UI.quiz.renderArea.appendChild(input);
+                UI.quiz.btnCheck.classList.remove('hide');
+                UI.quiz.btnCheck.innerText = "Kiểm Tra Đáp Án";
+                UI.quiz.btnCheck.onclick = () => {
+                    input.disabled = true;
+                    if(q.short_answer_key && input.value.trim().toLowerCase() === q.short_answer_key.toString().toLowerCase()) {
+                        input.style.borderColor = "green"; score++;
+                    } else {
+                        input.style.borderColor = "red";
+                    }
+                    showExp(`<b>Đáp án đúng:</b> ${q.short_answer_key} <br><br>${q.explanation}`);
+                };
+            } else if (q.type === 'tu_luan') {
+                UI.quiz.renderArea.innerHTML = `<textarea class="essay-input" placeholder="Gõ dàn ý hoặc bài làm của bạn..."></textarea>`;
+                UI.quiz.btnCheck.classList.remove('hide'); UI.quiz.btnCheck.innerText = "Xem Đáp Án Gợi Ý";
+                UI.quiz.btnCheck.onclick = () => {
+                    document.querySelector('.essay-input').disabled = true;
+                    showExp(`<b>Gợi ý bài làm:</b> ${q.suggested_answer || ''}<br><br><b>Giải thích:</b> ${q.explanation || ''}`);
+                };
+            }
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function showExp(txt) {
+            UI.quiz.expText.innerHTML = txt; UI.quiz.expBox.style.display = 'block';
+            UI.quiz.btnNext.classList.remove('hide'); UI.quiz.btnCheck.classList.add('hide');
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        UI.quiz.hintBtn.onclick = () => UI.quiz.hintBox.style.display = (UI.quiz.hintBox.style.display === 'block' ? 'none' : 'block');
+        UI.quiz.btnNext.onclick = () => {
+            currentIndex++;
+            if(currentIndex < currentQuestions.length) renderQuestion();
+            else {
+                UI.screens.quiz.classList.add('hide'); UI.screens.result.classList.remove('hide');
+                document.getElementById('score-text').innerText = `${score}/${currentQuestions.length}`;
+            }
+        };
+
+        document.getElementById('btn-generate-study').addEventListener('click', async () => {
+            const topic = UI.topic.value.trim(); if(!topic) return alert("Vui lòng nhập chủ đề bài học!");
+            Object.values(UI.screens).forEach(s => s.classList.add('hide')); UI.screens.loading.classList.remove('hide');
+            const md = await callAI(`Đóng vai giáo viên, viết một bài giảng chi tiết môn ${UI.subject.value} ${UI.grade.value} về chủ đề: "${topic}". Trình bày mạch lạc, có ví dụ minh họa dễ hiểu. Dùng Markdown để định dạng và bắt buộc bọc các công thức Toán/Lý/Hóa trong cú pháp LaTeX \\( \\).`, false);
+            if(md) {
+                UI.screens.loading.classList.add('hide'); UI.screens.study.classList.remove('hide');
+                document.getElementById('study-content').innerHTML = marked.parse(md);
+                if (window.MathJax) MathJax.typesetPromise();
+            } else {
+                UI.screens.loading.classList.add('hide'); UI.screens.welcome.classList.remove('hide');
+            }
+        });
+    </script>
+</body>
+</html>
